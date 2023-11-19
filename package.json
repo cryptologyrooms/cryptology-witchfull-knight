@@ -1,0 +1,23 @@
+{
+  "name": "witchfull-knight",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.19",
+    "dotenv": "^10.0.0",
+    "moment": "^2.29.1",
+    "moment-duration-format": "^2.3.2",
+    "moment-locales-webpack-plugin": "^1.2.0",
+    "moment-timezone": "^0.5.34",
+    "mqtt": "^4.2.8",
+    "mqtt-pattern": "^1.2.0",
+    "ziggy-js": "^1.4.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
