@@ -421,7 +421,6 @@ function log(...args) {
 function startMotor(clue) {
   // console.log('startMotor(clue)');
   if (clue.options.motor) {
-    // motorPin on
     log("Motor: ON")
     useMotor(motor, 1);
   }
@@ -429,7 +428,6 @@ function startMotor(clue) {
 
 function stopMotor() {
   // console.log('stopMotor');
-  // motorPin off
   log("Motor: OFF")
   useMotor(motor, 0);
 }
@@ -437,5 +435,3 @@ function stopMotor() {
 
 // turn off motor during startup
 stopMotor();
-
-// need some kind of loop here?
