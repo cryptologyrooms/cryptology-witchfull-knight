@@ -401,6 +401,7 @@ function playAudio(clue) {
     audioPath,
     { mpg123: ['-g', volume] },
     function(err) {
+      log('Playing ended: ' + audioPath);
       if (err) {
         log("Play Error:", err);
       } else {
