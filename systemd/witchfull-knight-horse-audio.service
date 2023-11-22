@@ -1,0 +1,13 @@
+[Unit]
+Description=Witchfull Knight Horse Audio
+After=network.target
+
+[Service]
+Type=simple
+User=tempus
+WorkingDirectory=/home/tempus/witchfull-knight-horse-audio
+ExecStart=/usr/bin/node /home/tempus/witchfull-knight-horse-audio/index.mjs
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
