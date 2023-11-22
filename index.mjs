@@ -13,12 +13,17 @@ import moment from 'moment-timezone';
 import momentDurationFormatSetup from 'moment-duration-format';
 
 momentDurationFormatSetup(moment);
-typeof moment.duration.fn.format === "function";
-typeof moment.duration.format === "function";
+typeof moment.duration.fn.format === 'function';
+typeof moment.duration.format === 'function';
+
+import Play from 'play-sound';
+let player = new Play({'player':'mpg123'});
+var audio = undefined;
 
 import ziggyJs from 'ziggy-js';
 
 async function loadZiggy() {
+  console.log('Loading Ziggy data');
   try {
     const response = await axios.get(process.env.APP_URL + '/api/ziggy');
     return await response.data;
@@ -32,6 +37,27 @@ let route = (name, params, absolute, config = Ziggy) => ziggyJs(name, params, ab
 
 const roomSlug = process.env.ROOM_SLUG;
 const roomScreenName = process.env.ROOM_SCREEN_NAME;
+const defaultVolume = process.env.DEFAULT_VOLUME;
+const motorPin = process.env.MOTOR_PIN;
+
+console.log('Room Slug: ' + roomSlug);
+console.log('Room ScreenName: ' + roomScreenName);
+console.log('Default volume: ' + defaultVolume);
+
+import Gpio from 'onoff';
+const useMotor = (motor, value) => motor.write(value);
+let motor;
+
+if (Gpio.accessible) {
+  motor = new Gpio.Gpio(motorPin, 'out');
+  // more real code here
+} else {
+  motor = {
+    write: value => {
+      console.log('Motor: virtual motor now uses value: ' + value);
+    }
+  };
+}
 
 let defaultData = {
   room: null,
@@ -53,10 +79,12 @@ let currentData = JSON.parse(JSON.stringify(defaultData));
 currentData.currentTime = moment();
 
 async function loadRoomData() {
+  console.log('Loading Room Data');
   await axios.get(route('api.rooms.show', roomSlug))
       .then(response => {
         if (response.status == 200) {
           currentData.room = response.data;
+          console.log('Loaded Room Data');
         }
       })
       .catch(error => {
@@ -71,6 +99,7 @@ async function loadRoomData() {
       .then(response => {
         if (response.status == 200) {
           currentData.clues = response.data;
+          console.log('Loaded Clues');
         }
       })
       .catch(error => {
@@ -81,6 +110,7 @@ async function loadRoomData() {
       .then(response => {
         if (response.status == 200) {
           currentData.events = response.data;
+          console.log('Loaded GameEvents');
         }
       })
       .catch(error => {
@@ -93,11 +123,12 @@ await loadRoomData();
 // let clientId = mqtt.options.clientId;
 const clientId = 'mqttjs_' + Math.random().toString(16).substr(2, 8);
 const localIp = Object.values(os.networkInterfaces()).flat().find(i => i.family == 'IPv4' && !i.internal).address;
-const presenceTopic = 'crypto/' + roomSlug + '/presence/' + clientId;
+const presenceTopic = 'tempus/room/' + roomSlug + '/presence/' + clientId;
 const presencePayload = {
     component: roomScreenName,
     state: 'WILL',
 };
+const puzzleLogTopic = 'tempus/room/' + roomSlug + '/puzzle/' + roomScreenName + '/log';
 
 const mqttOptions = {
     will:{
@@ -112,8 +143,8 @@ const mqttClient  = Mqtt.connect('mqtt://' + process.env.MQTT_HOST + ':' + proce
 // 'ws://' + process.env.MIX_MQTT_HOST + ':' + process.env.MIX_MQTT_PORT +'/mqtt'
 
 const mqttTopics = {
-  'crypto/+roomSlug/room-state' (data, packet, topic) {
-    if (topic != 'crypto/' + roomSlug + '/room-state') {
+  'tempus/room/+roomSlug/room-state' (data, packet, topic) {
+    if (topic != 'tempus/room/' + roomSlug + '/room-state') {
       return;
     }
 
@@ -122,8 +153,8 @@ const mqttTopics = {
     currentData.roomState = payload;
   },
 
-  'crypto/+roomSlug/duration' (data, packet, topic) {
-    if (topic != 'crypto/' + roomSlug + '/duration') {
+  'tempus/room/+roomSlug/duration' (data, packet, topic) {
+    if (topic != 'tempus/room/' + roomSlug + '/duration') {
       return;
     }
 
@@ -132,8 +163,8 @@ const mqttTopics = {
     currentData.duration = payload;
   },
 
-  'crypto/+roomSlug/start' (data, packet, topic) {
-    if (topic != 'crypto/' + roomSlug + '/start') {
+  'tempus/room/+roomSlug/start' (data, packet, topic) {
+    if (topic != 'tempus/room/' + roomSlug + '/start') {
       return;
     }
 
@@ -142,8 +173,8 @@ const mqttTopics = {
     currentData.start = payload;
   },
 
-  'crypto/+roomSlug/game-state' (data, packet, topic) {
-    if (topic != 'crypto/' + roomSlug + '/game-state') {
+  'tempus/room/+roomSlug/game-state' (data, packet, topic) {
+    if (topic != 'tempus/room/' + roomSlug + '/game-state') {
       return;
     }
 
@@ -152,8 +183,8 @@ const mqttTopics = {
     currentData.gameState = payload;
   },
 
-  'crypto/+roomSlug/clue' (data, packet, topic) {
-    if (topic != 'crypto/' + roomSlug + '/clue') {
+  'tempus/room/+roomSlug/clue' (data, packet, topic) {
+    if (topic != 'tempus/room/' + roomSlug + '/clue') {
       return;
     }
 
@@ -163,8 +194,8 @@ const mqttTopics = {
     clueReceived(payload);
   },
 
-  'crypto/+roomSlug/event' (data, packet, topic) {
-    if (topic != 'crypto/' + roomSlug + '/event') {
+  'tempus/room/+roomSlug/event' (data, packet, topic) {
+    if (topic != 'tempus/room/' + roomSlug + '/event') {
       return;
     }
 
@@ -174,8 +205,8 @@ const mqttTopics = {
     eventReceived(payload);
   },
 
-  'crypto/+roomSlug/music' (data, packet, topic) {
-    if (topic != 'crypto/' + roomSlug + '/music') {
+  'tempus/room/+roomSlug/music' (data, packet, topic) {
+    if (topic != 'tempus/room/' + roomSlug + '/music') {
       return;
     }
 
@@ -185,6 +216,7 @@ const mqttTopics = {
 };
 
 mqttClient.on('connect', function () {
+  console.log('MQTT: Connect');
   presencePayload.state = 'ONLINE';
   presencePayload.ip = localIp;
   mqttClient.publish(presenceTopic, JSON.stringify(presencePayload), {retain: true});
@@ -253,14 +285,25 @@ currentData.currentTimeInterval = setInterval(() => {
 }, 100);
 
 function clueReceived(clue) {
-  // clearTimeout(currentData.clueTimeout);
-  // currentData.clueHtml = clue.message;
-  // currentData.clueTimeout = setTimeout(() => {
-  //   currentData.clueHtml = null;
-  // }, 4000);
+  log('clueReceived(clue)', clue);
+
+  if (! clue.audioPath) {
+    return;
+  }
+
+  if (! clue.options.hasOwnProperty('screen')) {
+    return;
+  }
+
+  if (clue.options.screen != roomScreenName) {
+    return;
+  }
+
+  playAudio(clue);
 }
 
 function eventReceived(event) {
+  log('eventReceived(event)', event);
   switch (event.event) {
     default:
       break;
@@ -268,6 +311,7 @@ function eventReceived(event) {
 }
 
 function recoverStateFromGame() {
+  log('recoverStateFromGame()');
   let eventGameTimelines = currentData.game.game_timelines.filter(gameTimeline => gameTimeline.game_event_id != null)
   // console.log('recoverStateFromGame()', eventGameTimelines);
 
@@ -280,9 +324,9 @@ function recoverStateFromGame() {
 }
 
 function fetchGame(gameId) {
-  // console.log('fetchGame(gameId)', gameId);
+  log('fetchGame(gameId)', gameId);
 
-  axios.get(this.route('api.games.show', gameId))
+  axios.get(route('api.games.show', gameId))
     .then(response => {
       if (response.status == 200) {
         currentData.game = response.data;
@@ -316,10 +360,11 @@ function fetchGame(gameId) {
 }
 
 function sendEvent(eventCode, options = {}) {
+  log('sendEvent(eventCode, options)', eventCode, options);
   let event = Object.values(currentData.events).find(event => event.event == eventCode);
 
   if (event == null) {
-    console.log('sendEvent: code ' + eventCode + ' not found!');
+    log('sendEvent: code ' + eventCode + ' not found!');
 
     return;
   }
@@ -336,7 +381,60 @@ function sendEvent(eventCode, options = {}) {
     },
   };
 
-  mqttClient.publish('crypto/' + this.room.slug + '/event', JSON.stringify(eventPayload));
+  mqttClient.publish('tempus/room/' + this.room.slug + '/event', JSON.stringify(eventPayload));
 }
+
+function playAudio(clue) {
+  console.log('playAudio(clue)');
+  try {
+    audio.kill();
+  } catch (error) {
+    //
+  }
+
+  let audioPath = route('index') + clue.audioPath;
+  let volume = clue.options.volume ?? defaultVolume;
+  log('Playing : ' + audioPath + ' at volume: ' + volume);
+
+  startMotor(clue);
+  var audio = player.play(
+    audioPath,
+    { mpg123: ['-g', volume] },
+    function(err) {
+      if (err) {
+        log("Play Error:", err);
+      } else {
+        stopMotor();
+      }
+    }
+  );
+}
+
+function log(...args) {
+  console.log(...args);
+  if (mqttClient.connected) {
+    mqttClient.publish(puzzleLogTopic, JSON.stringify(args));
+  }
+}
+
+function startMotor(clue) {
+  // console.log('startMotor(clue)');
+  if (clue.options.motor) {
+    // motorPin on
+    log("Motor: ON")
+    useMotor(motor, 1);
+  }
+}
+
+function stopMotor() {
+  // console.log('stopMotor');
+  // motorPin off
+  log("Motor: OFF")
+  useMotor(motor, 0);
+}
+
+
+// turn off motor during startup
+stopMotor();
 
 // need some kind of loop here?

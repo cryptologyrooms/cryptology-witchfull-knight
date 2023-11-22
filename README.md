@@ -1,25 +1,23 @@
-# Witchfull Knight
+# Witchfull Knight Horse Audio
 
 ## Notes
-https://www.npmjs.com/package/nodemon
-https://www.npmjs.com/package/commander
-
 ```
 sudo apt-get update
 sudo apt-get install build-essential software-properties-common vim git curl apt-transport-https lsb-release ca-certificates dirmngr unzip
 sudo apt-get install avahi-daemon avahi-discover avahi-utils libnss-mdns
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 
-sudo npm install typescript rimraf node-gyp -g 
+# https://github.com/nodesource/distributions#debian-and-ubuntu-based-distributions
+
+sudo npm install typescript rimraf node-gyp -g
 sudo npm install ts-node -g
+sudo apt-get -y install mpg321
 ```
 
-https://pinout.xyz/pinout/pi_digiamp
-was IQAduIO is now owned by foundation
+was IQAduIO is now owned by foundation  
 https://www.raspberrypi.com/documentation/accessories/audio.html
+https://pinout.xyz/pinout/pi_digiamp  
 
-
-`dtoverlay=iqaudio-digiampplus,unmute_amp`  
+`dtoverlay=iqaudio-digiampplus,unmute_amp`
 `#dtparam=audio=on`
 
 used pins
@@ -35,4 +33,23 @@ used pins
 20  i2s
 21  i2s
 
+
+```
+var player = require('play-sound')(opts = {})
+
+player.play('http://staging-tempus.local/audio/rameseize/anticlock.mp3', { mpg123: ['-g', 10] }, function(err) {
+  if (err) throw err
+})
+```
+
+``` json
+{
+    "audioPath": "", // mp3 to play
+    "options": {
+        "screen": "ROOM_SCREEN_NAME", // ignore clue's that do not match our ROOM_SCREEN_NAME
+        "volume": 10, // 0 to 100 percent, or use DEFAULT_VOLUME
+        "motor": true // turn on motor during audio if true
+    }
+}
+```
 
