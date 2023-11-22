@@ -397,7 +397,7 @@ function playAudio(clue) {
   log('Playing : ' + audioPath + ' at volume: ' + volume);
 
   startMotor(clue);
-  var audio = player.play(
+  audio = player.play(
     audioPath,
     { mpg123: ['-g', volume] },
     function(err) {
