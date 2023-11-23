@@ -47,6 +47,7 @@ console.log('Default volume: ' + defaultVolume);
 import Gpio from 'onoff';
 const useMotor = (motor, value) => motor.write(value);
 let motor;
+let motorTimeout = null;
 
 if (Gpio.accessible) {
   motor = new Gpio.Gpio(motorPin, 'out');
@@ -423,6 +424,11 @@ function startMotor(clue) {
   if (clue.options.motor) {
     log("Motor: ON")
     useMotor(motor, 1);
+
+    clearTimeout(motorTimeout);
+    motorTimeout = setTimeout(() => {
+      stopMotor()
+    }, clue.options.motorDuration);
   }
 }
 
@@ -430,6 +436,7 @@ function stopMotor() {
   // console.log('stopMotor');
   log("Motor: OFF")
   useMotor(motor, 0);
+  clearTimeout(motorTimeout);
 }
 
 

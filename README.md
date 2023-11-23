@@ -48,7 +48,8 @@ player.play('http://staging-tempus.local/audio/rameseize/anticlock.mp3', { mpg12
     "options": {
         "screen": "ROOM_SCREEN_NAME", // ignore clue's that do not match our ROOM_SCREEN_NAME
         "volume": 10, // 0 to 100 percent, or use DEFAULT_VOLUME
-        "motor": true // turn on motor during audio if true
+        "motor": true, // turn on motor during audio if true
+        "motorDuration": 2000 // motor run time in ms, should aprox match the audio duration
     }
 }
 ```
