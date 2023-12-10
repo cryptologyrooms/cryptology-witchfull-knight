@@ -409,7 +409,7 @@ function playAudio(clue) {
       if (err) {
         log("Play Error:", err);
       } else {
-        stopMotor();
+        // stopMotor();
       }
     }
   );
