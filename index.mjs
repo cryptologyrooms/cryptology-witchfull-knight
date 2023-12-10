@@ -391,6 +391,7 @@ function playAudio(clue) {
   console.log('playAudio(clue)');
   try {
     audio.kill();
+    stopMotor();
   } catch (error) {
     //
   }
