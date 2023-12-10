@@ -49,10 +49,12 @@ const useMotor = (motor, value) => motor.write(value);
 let motor;
 let motorTimeout = null;
 
-if (Gpio.accessible) {
+if (Gpio.Gpio.accessible) {
+  console.log('Gpio: using real motor');
   motor = new Gpio.Gpio(motorPin, 'out');
   // more real code here
 } else {
+  console.log('Gpio: using virtual motor');
   motor = {
     write: value => {
       console.log('Motor: virtual motor now uses value: ' + value);
