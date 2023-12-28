@@ -1,12 +1,12 @@
 [Unit]
-Description=Witchfull Knight Horse Audio
+Description=Witchful Knight Horse Audio
 After=network-online.target
 
 [Service]
 Type=simple
 User=tempus
-WorkingDirectory=/home/tempus/witchfull-knight-horse-audio
-ExecStart=/usr/bin/node /home/tempus/witchfull-knight-horse-audio/index.mjs
+WorkingDirectory=/home/tempus/witchful-knight-horse-audio
+ExecStart=/usr/bin/node /home/tempus/witchful-knight-horse-audio/index.mjs
 Restart=always
 RestartSec=5
 

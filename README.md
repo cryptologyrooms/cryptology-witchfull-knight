@@ -1,4 +1,4 @@
-# Witchfull Knight Horse Audio
+# Witchful Knight Horse Audio
 
 ## Notes
 ```
