@@ -288,7 +288,7 @@ currentData.currentTimeInterval = setInterval(() => {
 }, 100);
 
 function clueReceived(clue) {
-  log('clueReceived(clue)', clue);
+  console.log('clueReceived(clue)', clue);
 
   if (! clue.audioPath) {
     return;
@@ -306,7 +306,7 @@ function clueReceived(clue) {
 }
 
 function eventReceived(event) {
-  log('eventReceived(event)', event);
+  console.log('eventReceived(event)', event);
   switch (event.event) {
     default:
       break;
